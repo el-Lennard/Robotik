@@ -24,15 +24,15 @@ data = [
 ]
 
 # Convert to a NumPy array (shape: 8x6)
-joint_angles = np.array(data, dtype=np.float64)
+#joint_angles = np.array(data, dtype=np.float64)
 #q = np.array([35, -60, 50,-100 , -100, 30]) / 180 * np.pi
 q = np.array([-41.98,-25.35,37.52,-101.5,-86.06,200.12]) / 180 * np.pi
 tcp = np.array([-0.36993,0.06035,0.35752,2.449,2.097,0.821])
 T_0_6 = robolib.fk_ur(dh, q)
-#print(robolib.T_2_rpy(T_0_6))
+print(robolib.T_2_rpy(T_0_6))
 #print(T_0_6)
 angles=robolib.inv_ur(dh, tcp)
-print(angles)
+#print(angles)
 #print(joint_angles)
 
 
