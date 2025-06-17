@@ -274,7 +274,7 @@ def inv_RoArm(dh_para, pose, qGripper):
     """ 
     #Backwards Kinematics for RoArm-M1
     """
-    
+
     # DH-parameter in geeigente Form bringen
     a = dh_para[:,1]
     d = dh_para[:,2]
@@ -286,7 +286,6 @@ def inv_RoArm(dh_para, pose, qGripper):
     R = T05[0:3, 0:3]
     # Translation des TCP
     P05 = T05[:4, 3]
-    
     # Koordinatentransformation
     theta = -np.sign(R[2,0])*np.arccos(R[2,2])
     q1 = np.arctan2(R[1,0], R[0,0]) + np.pi
@@ -297,12 +296,13 @@ def inv_RoArm(dh_para, pose, qGripper):
     P24 = P04_bo - P02  
     x = P24[0]  
     z = P24[2]  
-    
+  
     # Restliche Gelenkwinkel berechnen
     if((x**2 + z**2) <= (a[2]+a[3])):
         # Erste Lösung:
         cosq31 = (x**2 + z**2 - a[2]**2 - a[3]**2)/(2*a[2]*a[3])
         q31 = np.arccos(cosq31) 
+        
         
         if(q31 < 0):  
             # Hilfswinkel berrechen
@@ -319,7 +319,9 @@ def inv_RoArm(dh_para, pose, qGripper):
             # Erste Lösung:
             # Hilfswinkel berrechen
             psi = np.arccos((x**2 + z**2 + a[2]**2 - a[3]**2)/(2*a[2]*np.sqrt(x**2 + z**2)))
+            print(psi)
             beta = np.arctan2(z,x)
+            print(beta)
             
             q21 = np.pi/2 - (beta + psi); 
             q41 = theta - q31 - q21 + np.pi/2 
@@ -456,15 +458,16 @@ def q_dot_from_pose_dot(dh_para, q, pose_dot):
 # foreward kinematic RoArm
 qTest = np.array([180, 40, 90, -60 ,180])*np.pi/180.0 + qRoArm
 #qTest = np.array([180, 40, 90, -10 ,180]) / 180 * np.pi + qRoArm
+
 T_0_5 = fk_RoArm(dhRoArm, qTest)
-print(T_0_5)
+#print(T_0_5)
 pose = T_2_rotvec(T_0_5)
 
 
 # Verschiebung der pose in Weltkoordinaten, bei gleicher Orientierung
-pose_new = T_2_rotvec(transl(0,0,0.006) @ T_0_5)
-print(pose)
-print(pose_new)
+pose_new = T_2_rotvec(transl(0,0,-0.005) @ T_0_5)
+#print(pose)
+#print(pose_new)
 
 
 # inverse kinematic RoArm

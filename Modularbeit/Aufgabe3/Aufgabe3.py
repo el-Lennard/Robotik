@@ -73,10 +73,81 @@ def fk_ur(alpha,a,d,theta):
         T_0_5=T_0_5@dh(alpha[i],a[i],d[i],theta[i])
     return T_0_5
 
-def inv_ur(alpha,a,d, x, y, z, rx, ry, rz):
-    theta1=np.atan2(y,x)
-    theta1_alt= theta +np.pi
-    return theta1,theta1_alt
+def inv_RoArm(dh_para, pose, qGripper):
+    """ 
+    #Backwards Kinematics for RoArm-M1
+    """
+    
+    # DH-parameter in geeigente Form bringen
+    a = dh_para[:,1]
+    d = dh_para[:,2]
+    alpha = dh_para[:,0]
+    
+    # Pose in Matrix umwandeln
+    T05 = rotvec_2_T(pose)
+    # Rotation matrix des TCP
+    R = T05[0:3, 0:3]
+    # Translation des TCP
+    P05 = T05[:4, 3]
+    
+    # Winkel zwischen zBasis und zTCP
+    theta = -np.sign(R[2,0])*np.arccos(R[2,2])
+    
+    #  Basisrotation q1 bestimmen, sodass Arm auf x-Basis liegt
+    # --> Berechnen des Winkels Zwischen xBasis und xTCP, projeziert auf die XY-Ebene
+    q1 = np.arctan2(R[1,0], R[0,0]) + np.pi
+    
+    # Stellung in die XZ-Achse des Basiskoordinatensystems transformeieren,
+    # um die Gelenkwinkel für einen 2D 3-Achs Problem zu lösen
+    # Rückdrehung auf Basis-X-Achse
+    Rz = rotz_lh(q1-np.pi)  
+    # Lage von Gelenk 4:
+    P04 = T05 @ np.array([-a[4], 0, -d[4], 1])
+    # In Basisorientierung drehen:
+    P04_bo = Rz @ P04
+    # Verschiebe Ursprung von Basis nach Gelenk 2
+    P02 = np.array([a[1], 0, d[0], 1])  # Gelenk 2 liegt auf x-Achse um a[1] verschoben und um d[0] angehoben
+    P24 = P04_bo - P02  # Punkt von Gelenk 4 relativ zu Gelenk 2 im Basis-x-ausgerichteten System
+    
+    # Ergebnis:
+    x = P24[0]  # Projektion entlang Basis-X
+    z = P24[2]  # Höhe
+    
+    
+    if((x**2 + z**2) <= (a[2]+a[3])):
+        # Erste Lösung:
+        cosq31 = (x**2 + z**2 - a[2]**2 - a[3]**2)/(2*a[2]*a[3])
+        q31 = np.arccos(cosq31) 
+        
+        if(q31 < 0):  
+            # Hilfswinkel berrechen
+            psi = np.arccos((x**2 + z**2 + a[2]**2 - a[3]**2)/(2*a[2]*np.sqrt(x**2 + z**2)))
+            beta = np.arctan2(z,x)
+            
+            q21 = np.pi/2 - (beta - psi); #Drehrichtung und Homeposition beachten
+            q41 = theta - q31 - q21 + np.pi/2 #Homeposition beachten
+            # Zweite Lösung:
+            q32 = -q31;
+            q22 = np.pi/2 - (beta + psi); #Drehrichtung und Homeposition beachten
+            q42 = theta - q32 - q22 + np.pi/2 #Homeposition beachten
+        else:
+            # Erste Lösung:
+            # Hilfswinkel berrechen
+            psi = np.arccos((x**2 + z**2 + a[2]**2 - a[3]**2)/(2*a[2]*np.sqrt(x**2 + z**2)))
+            beta = np.arctan2(z,x)
+            
+            q21 = np.pi/2 - (beta + psi); #Drehrichtung und Homeposition beachten
+            q41 = theta - q31 - q21 + np.pi/2 #Homeposition beachten
+            # Zweite Lösung:
+            q32 = -q31;
+            q22 = np.pi/2 - (beta - psi); #Drehrichtung und Homeposition beachten
+            q42 = theta - q32 - q22 + np.pi/2 #Homeposition beachten
+    else:
+        print()
+        print("Nicht lösbar")
+        
+    Q = np.array([[q1, q21, q31, q41, qGripper], [q1, q22, q32, q42, qGripper]])  
+    return Q
 
 
 

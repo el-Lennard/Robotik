@@ -63,7 +63,7 @@ def dh(alpha, a, d, theta):
     st=np.sin(theta)
     sa=np.sin(alpha)
     ca=np.cos(alpha)
-    T = np.array([[ct,   -st*ca,     st*sa, a*ct ],
+    T = np.array([[ct,   -st*ca,     st*sa, a*ct ], #
                   [st,   ct*ca,     -ct*sa,a*st ],
                   [0,     sa,              ca    ,      d  ],
                   [0,       0                   ,0         , 1]])
@@ -80,9 +80,9 @@ def fk_ur(alpha,a,d,theta):
     return T_0_5
 if __name__ == "__main__":
     alpha=np.array([+np.pi/2,0,0,-np.pi/2,0])
-    a=np.array([-41.05,-168.86,-127.92,-108.54,0])
-    d=np.array([115.74,0,0,-13.99,-10.96])
-    theta=np.array([180,30-90,90,10,180])*(np.pi/180) #Winkel2 -90 Grad Offset
+    a=np.array([-0.04105,-0.16886,-0.12792,-0.10854,0])
+    d=np.array([0.11574,0,-0.01399,0,-0.01096])
+    theta=np.array([180,40-90,90,-60,180])*(np.pi/180) #Winkel2 -90 Grad Offset
     T=fk_ur(alpha,a,d,theta)
     print(T)
     print(T_2_rotvec(T))
