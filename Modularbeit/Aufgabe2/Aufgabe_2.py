@@ -77,13 +77,12 @@ def fk_ur(alpha,a,d,theta):
     T_0_5 = np.eye(4)
     for i in range(len(alpha)):
         T_0_5=T_0_5@dh(alpha[i],a[i],d[i],theta[i])
-        print(T_0_5)
     return T_0_5
 if __name__ == "__main__":
-    alpha=np.array([np.pi/2,0,0,0,-np.pi/2,0])
-    a=np.array([-41.05,-168.86,-127.92,-108.54,0,0])
-    d=np.array([115.74,0,0,0,13.99,-10.96])
-    theta=np.array([180,90-90,0,0,180,0])*(np.pi/180) #Winkel2 -90 Grad Offset
+    alpha=np.array([+np.pi/2,0,0,-np.pi/2,0])
+    a=np.array([-41.05,-168.86,-127.92,-108.54,0])
+    d=np.array([115.74,0,0,-13.99,-10.96])
+    theta=np.array([180,30-90,90,10,180])*(np.pi/180) #Winkel2 -90 Grad Offset
     T=fk_ur(alpha,a,d,theta)
     print(T)
     print(T_2_rotvec(T))
